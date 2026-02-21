@@ -31,7 +31,7 @@ async fn main() -> bybit_api::Result<()> {
                         println!(
                             "    {} @ {}",
                             arr.get(1).unwrap_or(&serde_json::Value::Null),
-                            arr.get(0).unwrap_or(&serde_json::Value::Null)
+                            arr.first().unwrap_or(&serde_json::Value::Null)
                         );
                     }
                 }
@@ -43,7 +43,7 @@ async fn main() -> bybit_api::Result<()> {
                         println!(
                             "    {} @ {}",
                             arr.get(1).unwrap_or(&serde_json::Value::Null),
-                            arr.get(0).unwrap_or(&serde_json::Value::Null)
+                            arr.first().unwrap_or(&serde_json::Value::Null)
                         );
                     }
                 }
