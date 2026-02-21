@@ -18,7 +18,9 @@ async fn main() -> bybit_api::Result<()> {
 
     // Get all linear positions (need to specify settleCoin)
     println!("Fetching positions...");
-    let positions = client.get_positions(Category::Linear, None, Some("USDT")).await?;
+    let positions = client
+        .get_positions(Category::Linear, None, Some("USDT"))
+        .await?;
 
     println!("Found {} positions", positions.list.len());
 
