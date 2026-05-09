@@ -149,7 +149,7 @@ impl PlaceOrderParams {
                 None => {
                     return Err(BybitError::InvalidParam(
                         "price is required for limit orders".into(),
-                    ))
+                    ));
                 }
                 Some(p) => {
                     let price: Decimal = p.parse().map_err(|_| {

@@ -4,15 +4,16 @@ use futures_util::{SinkExt, StreamExt};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::net::TcpStream;
-use tokio::sync::{mpsc, RwLock};
-use tokio::time::{interval, Duration};
-use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
+use tokio::sync::{RwLock, mpsc};
+use tokio::time::{Duration, interval};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async, tungstenite::Message};
 use tracing::{debug, error, info, warn};
 
 use crate::auth::{generate_ws_signature, get_timestamp};
 use crate::config::WsConfig;
 use crate::error::{BybitError, Result};
 use crate::websocket::models::*;
+use crate::{MAINNET_WS_TRADE, TESTNET_WS_TRADE};
 
 type WsStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
 type Callback = Arc<dyn Fn(WsMessage) + Send + Sync>;
@@ -160,6 +161,9 @@ impl BybitWebSocket {
                             .get("success")
                             .and_then(|v| v.as_bool())
                             .unwrap_or(false)
+                            || json.get("retCode").and_then(|v| v.as_i64()) == Some(0)
+                        // ^^^ this is for *_WS_TRADE ^^^
+                        // https://bybit-exchange.github.io/docs/v5/websocket/trade/guideline#response-parameters
                         {
                             info!("Authentication successful");
                         } else {
@@ -237,6 +241,9 @@ impl BybitWebSocket {
         let expires = get_timestamp() + 10000;
         let signature = generate_ws_signature(api_secret, expires);
 
+        // if self.config.url == TESTNET_WS_TRADE || self.config.url == MAINNET_WS_TRADE {
+        //     let auth_msg = WsTradeAuthResponse
+        // }
         let auth_msg = WsAuthRequest {
             req_id: uuid::Uuid::new_v4().to_string(),
             op: "auth".to_string(),

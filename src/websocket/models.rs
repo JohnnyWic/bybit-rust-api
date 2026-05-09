@@ -24,6 +24,24 @@ pub struct WsAuthRequest {
     pub args: Vec<serde_json::Value>,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WsTradeAuthRequest {
+    pub req_id: String,
+    pub op: String,
+    pub args: Vec<serde_json::Value>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WsTradeAuthResponse {
+    pub req_id: String,
+    pub ret_code: i32,
+    pub ret_msg: String,
+    pub op: String,
+    pub conn_id: String,
+}
+
 /// WebSocket response.
 #[derive(Debug, Clone, Deserialize)]
 pub struct WsResponse {
