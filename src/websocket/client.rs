@@ -4,9 +4,9 @@ use futures_util::{SinkExt, StreamExt};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::net::TcpStream;
-use tokio::sync::{RwLock, mpsc};
-use tokio::time::{Duration, interval};
-use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async, tungstenite::Message};
+use tokio::sync::{mpsc, RwLock};
+use tokio::time::{interval, Duration};
+use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 use tracing::{debug, error, info, warn};
 
 use crate::auth::{generate_ws_signature, get_timestamp};
@@ -25,6 +25,7 @@ pub struct BybitWebSocket {
     callbacks: Arc<RwLock<HashMap<String, Callback>>>,
     tx: Option<mpsc::Sender<Message>>,
     is_connected: Arc<RwLock<bool>>,
+    is_trade: bool,
 }
 
 impl BybitWebSocket {
@@ -36,6 +37,7 @@ impl BybitWebSocket {
             callbacks: Arc::new(RwLock::new(HashMap::new())),
             tx: None,
             is_connected: Arc::new(RwLock::new(false)),
+            is_trade: false, 
         }
     }
 
@@ -47,6 +49,7 @@ impl BybitWebSocket {
             callbacks: Arc::new(RwLock::new(HashMap::new())),
             tx: None,
             is_connected: Arc::new(RwLock::new(false)),
+            is_trade: url == MAINNET_WS_TRADE || url == TESTNET_WS_TRADE,
         }
     }
 
@@ -241,19 +244,27 @@ impl BybitWebSocket {
         let expires = get_timestamp() + 10000;
         let signature = generate_ws_signature(api_secret, expires);
 
-        // if self.config.url == TESTNET_WS_TRADE || self.config.url == MAINNET_WS_TRADE {
-        //     let auth_msg = WsTradeAuthResponse
-        // }
-        let auth_msg = WsAuthRequest {
-            req_id: uuid::Uuid::new_v4().to_string(),
-            op: "auth".to_string(),
-            args: vec![
-                serde_json::Value::String(api_key.clone()),
-                serde_json::Value::Number(expires.into()),
-                serde_json::Value::String(signature),
-            ],
+        let auth_msg= if self.is_trade {
+            AuthRequest::Trade(WsTradeAuthRequest {
+                req_id: uuid::Uuid::new_v4().to_string(),
+                op: "auth".to_string(),
+                args: vec![
+                    serde_json::Value::String(api_key.clone()),
+                    serde_json::Value::Number(expires.into()),
+                    serde_json::Value::String(signature),
+                ],
+            })
+        } else {
+            AuthRequest::Public(WsAuthRequest {
+                req_id: uuid::Uuid::new_v4().to_string(),
+                op: "auth".to_string(),
+                args: vec![
+                    serde_json::Value::String(api_key.clone()),
+                    serde_json::Value::Number(expires.into()),
+                    serde_json::Value::String(signature),
+                ],
+            })
         };
-
         let msg = serde_json::to_string(&auth_msg).map_err(|e| BybitError::Parse(e.to_string()))?;
 
         self.send(msg).await?;

@@ -32,6 +32,13 @@ pub struct WsTradeAuthRequest {
     pub args: Vec<serde_json::Value>,
 }
 
+#[derive(Serialize)]
+#[serde(untagged)] // Fondamentale per mantenere il formato JSON originale
+pub enum AuthRequest {
+    Trade(WsTradeAuthRequest),
+    Public(WsAuthRequest),
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WsTradeAuthResponse {
