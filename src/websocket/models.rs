@@ -128,6 +128,140 @@ pub struct WsPong {
     pub op: Option<String>,
 }
 
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct WsTradeOrderHeader {
+    #[serde(rename = "X-BAPI-TIMESTAMP")]
+    pub x_bapi_timestamp: String, 
+    // #[serde(rename = "X-BAPI-RECV-WINDOW")]
+    // pub x_bapi_recv_window: String,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum WsTradeOrderCategory {
+    Spot,
+    Linear,
+    Inverse,
+    Option,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum WsTradeOrderOp {
+    Create,
+    Amend,
+    Delete
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WsTradeOrderArgs {
+    pub category: String, // linear, inverse, spot, option
+    pub symbol: String,
+    pub side: String,     // Buy, Sell
+    pub order_type: String, // Market, Limit
+    pub qty: String,
+    
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub price: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub is_leverage: Option<i32>, // 0: false, 1: true
+    
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub market_unit: Option<String>, // baseCoin, quoteCoin
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub time_in_force: Option<String>, // GTC, IOC, FOK, PostOnly
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub order_link_id: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub take_profit: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub stop_loss: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub tp_trigger_by: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub sl_trigger_by: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub reduce_only: Option<bool>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub close_on_trigger: Option<bool>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub position_idx: Option<i32>, // 0, 1, 2
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub trigger_price: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub trigger_by: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub tp_limit_price: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub sl_limit_price: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub tp_order_type: Option<String>,
+    
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub sl_order_type: Option<String>,
+
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OptionTickerData {
+    pub symbol: String,
+    pub ask_iv: f64,
+    pub ask_price: f64,
+    pub ask_size: f64,
+    pub bid_iv: f64,
+    pub bid_price: f64,
+    
+    pub bid_size: f64,
+    
+    pub delta: f64,
+    
+    pub gamma: f64,
+    
+    pub theta: f64,
+    
+    pub vega: f64,
+    
+    pub mark_price: f64,
+    
+    pub index_price: f64,
+    
+    pub underlying_price: f64,
+    
+    pub open_interest: f64,
+    
+    pub volume24h: f64,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WsTradeOrder {
+    pub req_id: uuid::Uuid,
+    pub header: WsTradeOrderHeader,
+    /// order.create order.amend order.cancel
+    pub op: String,
+    pub args: Vec<WsTradeOrderArgs>
+
+
+}
+
 /// Check if message is a pong response.
 pub fn is_pong(msg: &serde_json::Value) -> bool {
     if let Some(op) = msg.get("op").and_then(|v| v.as_str()) {

@@ -43,7 +43,9 @@ hex = "0.4"
 # Utilities
 chrono = { version = "0.4", features = ["serde"] }
 url = "2"
-uuid = { version = "1", features = ["v4"] }
+uuid = { version = "1", features = ["serde", "v4", "v7"] }
+log = "0.4.29"
+regex = "1.12.3"
 
 [dev-dependencies]
 tokio-test = "0.4"

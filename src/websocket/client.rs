@@ -208,6 +208,8 @@ impl BybitWebSocket {
                             }
                         }
                     }
+
+                    debug!("{:#?}", text);
                 }
                 Ok(Message::Ping(_)) => {
                     debug!("Received ping frame");
@@ -332,8 +334,7 @@ impl BybitWebSocket {
             args: topics,
         };
 
-        let msg =
-            serde_json::to_string(&unsub_msg).map_err(|e| BybitError::Parse(e.to_string()))?;
+        let msg = serde_json::to_string(&unsub_msg).map_err(|e| BybitError::Parse(e.to_string()))?;
 
         self.send(msg).await
     }
@@ -348,6 +349,19 @@ impl BybitWebSocket {
             })?;
         }
         Ok(())
+    }
+
+    
+
+    pub async fn send_order(&self, order: WsTradeOrder) -> Result<()> {
+        debug!("{:#?}", order);
+        if !self.is_trade {
+            error!("can t execute a trade on a non trade socket");
+            return Err(BybitError::Parse(("can t execute a trade on a non trade socket".to_string())));
+        }
+        let msg = serde_json::to_string(&order).map_err(|e| BybitError::Parse(e.to_string()))?;
+        self.send(msg).await
+
     }
 
     /// Check if connected.
