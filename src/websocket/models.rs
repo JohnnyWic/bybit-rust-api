@@ -223,31 +223,31 @@ pub struct WsTradeOrderArgs {
 #[serde(rename_all = "camelCase")]
 pub struct OptionTickerData {
     pub symbol: String,
-    pub ask_iv: f64,
-    pub ask_price: f64,
-    pub ask_size: f64,
-    pub bid_iv: f64,
-    pub bid_price: f64,
+    pub ask_iv: String,
+    pub ask_price: String,
+    pub ask_size: String,
+    pub bid_iv: String,
+    pub bid_price: String,
     
-    pub bid_size: f64,
+    pub bid_size: String,
     
-    pub delta: f64,
+    pub delta: String,
     
-    pub gamma: f64,
+    pub gamma: String,
     
-    pub theta: f64,
+    pub theta: String,
     
-    pub vega: f64,
+    pub vega: String,
     
-    pub mark_price: f64,
+    pub mark_price: String,
     
-    pub index_price: f64,
+    pub index_price: String,
     
-    pub underlying_price: f64,
+    pub underlying_price: String,
     
-    pub open_interest: f64,
+    pub open_interest: String,
     
-    pub volume24h: f64,
+    pub volume24h: String,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

@@ -1,6 +1,7 @@
 //! WebSocket client implementation.
 
 use futures_util::{SinkExt, StreamExt};
+use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::net::TcpStream;
@@ -310,6 +311,50 @@ impl BybitWebSocket {
 
         self.send(msg).await
     }
+
+    pub async fn subscribe_mut<F>(&mut self, topics: Vec<String>, callback: F) -> Result<()>
+where
+    F: FnMut(WsMessage) + Send + Sync + 'static,
+{
+    // 1. Wrap the FnMut in a Mutex to "convert" it to an Fn closure
+    let callback_mutable = Mutex::new(callback);
+
+    // 2. Create an Fn closure that locks the mutex and calls the inner FnMut
+    let wrapped_callback = move |msg: WsMessage| {
+        let mut cb = callback_mutable.lock();
+        (&mut *cb)(msg);
+    };
+
+    // 3. Wrap in Arc and cast to your existing Callback type
+    let callback_arc = Arc::new(wrapped_callback) as Callback;
+
+    // --- The rest of the logic remains the same as your original function ---
+
+    // Register callbacks
+    {
+        let mut cbs = self.callbacks.write().await;
+        for topic in &topics {
+            cbs.insert(topic.clone(), callback_arc.clone());
+        }
+    }
+
+    // Store subscriptions
+    {
+        let mut subs = self.subscriptions.write().await;
+        subs.extend(topics.clone());
+    }
+
+    // Send subscription request
+    let sub_msg = WsRequest {
+        req_id: uuid::Uuid::new_v4().to_string(),
+        op: "subscribe".to_string(),
+        args: topics,
+    };
+
+    let msg = serde_json::to_string(&sub_msg).map_err(|e| BybitError::Parse(e.to_string()))? ;
+
+    self.send(msg).await
+}
 
     /// Unsubscribe from topics.
     pub async fn unsubscribe(&mut self, topics: Vec<String>) -> Result<()> {
