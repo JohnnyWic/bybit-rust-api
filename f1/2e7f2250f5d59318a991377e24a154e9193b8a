@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2-bit.9+daa2e24",
+  "base_commit_sha": "f12e7f2250f5d59318a991377e24a154e9193b8a",
+  "prompts": {
+    "3f9cd3ee2cefa937": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e2267b39-b123-428d-a1fb-c488ae98ce89",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "johnny.wang",
+      "messages": [],
+      "total_additions": 4917,
+      "total_deletions": 4,
+      "accepted_lines": 4810,
+      "overriden_lines": 3
+    }
+  }
+}
