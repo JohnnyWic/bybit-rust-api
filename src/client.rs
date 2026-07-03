@@ -1,8 +1,8 @@
 //! HTTP client for Bybit REST API.
 
-use reqwest::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
-use serde::de::DeserializeOwned;
+use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 use tracing::{debug, warn};
 
 use crate::auth::{generate_signature, get_timestamp};

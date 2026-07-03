@@ -34,6 +34,7 @@ mod config;
 mod constants;
 mod error;
 mod models;
+mod utils;
 
 // API modules
 pub mod api;
